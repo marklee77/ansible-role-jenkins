@@ -15,16 +15,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.memory = 1280
   end
 
-  #config.vm.provision "ansible" do |ansible|
-  #  ansible.playbook = "getroles.yml"
-  #end
-
-  #config.vm.provision "ansible" do |ansible|
-  #  ansible.playbook = "site.yml"
-  #  ansible.extra_vars = {
-  #    owncloud_http_port: 8080,
-  #    owncloud_require_ssl: false,
-  #  }
-  #end
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "provisioning/deploy.yml"
+    ansible.extra_vars = {
+      jenkins_http_port: 8080,
+      jenkins_require_ssl: false,
+    }
+  end
 
 end
