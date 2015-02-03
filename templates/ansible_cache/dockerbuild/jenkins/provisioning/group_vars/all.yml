@@ -1,0 +1,4 @@
+---
+# This file is ONLY for variables that may be overridden during the image BUILD
+# phase.
+jenkins_dockerize_context: docker

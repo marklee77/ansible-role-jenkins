@@ -12,7 +12,7 @@ RUN mkdir -p /etc/my_init.d && \
     cp scripts/startjenkins.sh /etc/my_init.d/10-jenkins && \
     chmod 0755 /etc/my_init.d/10-jenkins
 
-#VOLUME [ "/root", "/etc/mysql", \
-#         "/var/run/mysqld", "/var/lib/mysql", "/var/log/mysql" ]
+VOLUME [ "/var/run/jenkins", "/var/cache/jenkins", "/var/lib/jenkins", \
+         "/var/log/jenkins" ]
 
 EXPOSE 3306
