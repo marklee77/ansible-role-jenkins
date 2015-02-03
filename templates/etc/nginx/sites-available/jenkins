@@ -1,0 +1,76 @@
+# JENKINS
+
+upstream jenkins {
+  server unix:/home/git/jenkins/tmp/sockets/jenkins.socket;
+}
+
+server {
+
+  listen {{ jenkins_http_port }};
+  server_name {{ jenkins_hostname }};
+  server_tokens off;     
+  root /home/git/jenkins/public;
+
+  {% if jenkins_enable_ssl -%}
+  listen {{ jenkins_https_port }} ssl;
+  ssl_certificate {{ jenkins_ssl_cert_file }};
+  ssl_certificate_key {{ jenkins_ssl_key_file }};
+  ssl_session_timeout 30m;
+  ssl_protocols       SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers         HIGH:!aNULL:!MD5;
+
+  {% if jenkins_require_ssl -%}
+  if ($scheme = http) {
+    return 301 https://$server_name
+    {%- if jenkins_https_port != 443 %}:{{ jenkins_https_port }}{% endif -%}
+        $request_uri;
+  }
+  {%- endif %}
+  {%- endif %}
+  
+  # Increase this if you want to upload large attachments
+  # Or if you want to accept large git objects over http
+  client_max_body_size 20m;
+
+  # individual nginx logs for this jenkins vhost
+  access_log  /var/log/nginx/jenkins_access.log;
+  error_log   /var/log/nginx/jenkins_error.log;
+
+  location / {
+    # serve static files from defined root folder;.
+    # @jenkins is a named location for the upstream fallback, see below
+    try_files $uri $uri/index.html $uri.html @jenkins;
+  }
+
+  # if a file, which is not found in the root folder is requested,
+  # then the proxy pass the request to the upsteam (jenkins unicorn)
+  location @jenkins {
+    # If you use https make sure you disable gzip compression 
+    # to be safe against BREACH attack
+    # gzip off;
+
+    proxy_read_timeout 300; # Some requests take more than 30 seconds.
+    proxy_connect_timeout 300; # Some requests take more than 30 seconds.
+    proxy_redirect     off;
+
+    proxy_set_header   X-Forwarded-Proto $scheme;
+    proxy_set_header   Host              $http_host;
+    proxy_set_header   X-Real-IP         $remote_addr;
+    proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+
+    proxy_pass http://jenkins;
+  }
+
+  # Enable gzip compression as per rails guide: http://guides.rubyonrails.org/asset_pipeline.html#gzip-compression
+  # WARNING: If you are using relative urls do remove the block below
+  # See config/application.rb under "Relative url support" for the list of
+  # other files that need to be changed for relative url support
+  location ~ ^/(assets)/  {
+    root /home/git/jenkins/public;
+    gzip_static on; # to serve pre-gzipped version
+    expires max;
+    add_header Cache-Control public;
+  }
+
+  error_page 502 /502.html;
+}
