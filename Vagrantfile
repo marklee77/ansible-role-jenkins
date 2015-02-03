@@ -20,9 +20,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.username = "root"
   config.ssh.private_key_path = "keys/phusion.key"
 
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "provisioning/getreqs.yml"
-  end
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.playbook = "provisioning/getreqs.yml"
+  #end
 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "provisioning/deploy.yml"
