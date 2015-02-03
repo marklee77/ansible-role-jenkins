@@ -57,7 +57,6 @@
     ports: "{{ jenkins_bind_address }}:{{ jenkins_port }}:80"
     detach: yes
     env: 
-      - mysql_root_password={{ jenkins_mysql_root_password }}
     state: running
   register: server_startup
 

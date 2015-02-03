@@ -6,7 +6,6 @@
     update_cache: yes 
     cache_valid_time: 600
   with_items:
-    - nginx
     - python-software-properties
 
 - name: ensure jenkins repository public key is installed
@@ -28,3 +27,4 @@
     cache_valid_time: 600
   with_items:
     - jenkins
+    - nginx
