@@ -1,14 +1,15 @@
 ---
-jenkins_run_dir: "{{ lookup('env', 'PWD') }}"
-
-jenkins_mysql_root_password: >
-  {{ lookup('password', jenkins_run_dir + 
-                        '/private/credentials/mysql-root-password 
-                         length=20 
-                         chars=ascii_letters,digits') }}
-
 jenkins_apt_key_url: https://jenkins-ci.org/debian/jenkins-ci.org.key
 jenkins_apt_repository: deb http://pkg.jenkins-ci.org/debian binary/
+
+jenkins_http_port: 80
+jenkins_https_port: 443
+jenkins_enable_ssl: true
+jenkins_require_ssl: true
+
+jenkins_ssl_cert_file: /etc/ssl/certs/jenkins.pem
+jenkins_ssl_key_file: /etc/ssl/private/jenkins.pem
+
 
 # The variables below only apply to dockerized deployment
 # NOTE: there seems to be some kind of bug when boolean variables are
@@ -17,4 +18,4 @@ jenkins_dockerized_deployment: false
 jenkins_docker_username: "{{ default_docker_username|default('default') }}"
 jenkins_docker_build_image: true
 jenkins_docker_imagename: jenkins
-jenkins_docker_containername: jenkins-ci
+jenkins_docker_containername: jenkins

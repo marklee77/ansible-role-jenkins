@@ -18,11 +18,20 @@ Role Variables
 --------------
 
 Configuration variables are shown below along with default values.
+- jenkins_apt_key_url: https://jenkins-ci.org/debian/jenkins-ci.org.key
+- jenkins_apt_repository: deb http://pkg.jenkins-ci.org/debian binary/
++ jenkins_http_port: 80
+- jenkins_https_port: 443
+- jenkins_enable_ssl: true
+- jenkins_require_ssl: true
+- jenkins_ssl_cert_file: /etc/ssl/certs/jenkins.pem
+- jenkins_ssl_key_file: /etc/ssl/private/jenkins.pem
 
 The variables below only affect the dockerized deployment:
 
 - jenkins_dockerized_deployment: false
 - jenkins_docker_username: default
+- jenkins_docker_build_image: true
 - jenkins_docker_imagename: jenkins
 - jenkins_docker_containername: jenkins-ci
 

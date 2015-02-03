@@ -1,26 +1,41 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
 
+VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
 
-  config.vm.network "forwarded_port", guest: 8080, host: 8080, 
-    auto_correct: false
+  config.vm.post_up_message = "connect to port 8080!"
 
-  config.vm.provider "virtualbox" do |v|
-    v.memory = 1280
+  config.vm.provider "docker" do |d|
+    d.image      = "marklee77/baseimage-python-docker"
+    d.cmd        = ["/sbin/my_init", "--enable-insecure-key"]
+    d.has_ssh    = true
+    d.privileged = true
+  end
+
+  config.ssh.username = "root"
+  config.ssh.private_key_path = "keys/phusion.key"
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "provisioning/getreqs.yml"
   end
 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "provisioning/deploy.yml"
     ansible.extra_vars = {
       jenkins_http_port: 8080,
+      jenkins_enable_ssl: false,
       jenkins_require_ssl: false,
+      jenkins_ssh_port: "{{ ansible_ssh_port }}"
     }
   end
+
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.playbook = "provisioning/test.yml"
+  #end
 
 end
