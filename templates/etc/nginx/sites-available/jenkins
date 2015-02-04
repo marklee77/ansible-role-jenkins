@@ -1,9 +1,5 @@
 # JENKINS
 
-upstream jenkins {
-  server localhost:{{ jenkins_internal_port }};
-}
-
 server {
 
   listen {{ jenkins_http_port }};
@@ -37,14 +33,6 @@ server {
   error_log   /var/log/nginx/jenkins_error.log;
 
   location / {
-    # serve static files from defined root folder;.
-    # @jenkins is a named location for the upstream fallback, see below
-    try_files $uri $uri/index.html $uri.html @jenkins;
-  }
-
-  # if a file, which is not found in the root folder is requested,
-  # then the proxy pass the request to the upsteam (jenkins unicorn)
-  location @jenkins {
     # If you use https make sure you disable gzip compression 
     # to be safe against BREACH attack
     gzip off;
@@ -58,7 +46,7 @@ server {
     proxy_set_header   X-Real-IP         $remote_addr;
     proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
 
-    proxy_pass http://jenkins;
+    proxy_pass http://localhost:{{ jenkins_internal_port }};
   }
 
   error_page 502 /502.html;

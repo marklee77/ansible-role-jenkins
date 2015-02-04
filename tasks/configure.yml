@@ -22,6 +22,7 @@
     owner: root
     group: root
     mode: 0644
+  register: nginx_template
 
 - name: ensure /etc/nginx/sites-enabled/jenkins exists and links to ../sites-available/jenkins
   file:
@@ -29,6 +30,7 @@
     src: ../sites-available/jenkins
     force: yes
     state: link
+  register: nginx_link
 
 - name: ensure that there is not a hostname collision with the nginx default host
   lineinfile:
@@ -37,6 +39,7 @@
     backrefs: yes
     line: '\1#\2'
     state: present
+  register: nginx_collision
 
 - name: ensure jenkins services are started and enabled
   service:
@@ -52,4 +55,10 @@
     name: jenkins
     state: restarted
   when: jenkins_listenport|changed or jenkins_listenaddr|changed
+
+- name: ensure nginx is restarted if necessary
+  service:
+    name: nginx
+    state: restarted
+  when: nginx_template|changed or nginx_link|changed or nginx_collision_changed
 
