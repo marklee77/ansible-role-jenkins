@@ -1,4 +1,20 @@
 ---
+- name: update /etc/default/jenkins to listen on desired port
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: "^HTTP_PORT="
+    line: "HTTP_PORT={{ jenkins_internal_port }}"
+    state: present
+  register: jenkins_listenport
+
+- name: update /etc/default/jenkins to listen to localhost
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: "^JENKINS_ARGS="
+    line: JENKINS_ARGS="--webroot=/var/cache/jenkins/war --httpListenAddress=127.0.0.1 --httpPort=$HTTP_PORT --ajp13Port=$AJP_PORT"
+    state: present
+  register: jenkins_listenaddr
+
 - name: update /etc/nginx/sites-available/jenkins from template
   template:
     src: etc/nginx/sites-available/jenkins
@@ -6,8 +22,6 @@
     owner: root
     group: root
     mode: 0644
-  notify:
-    - restart nginx
 
 - name: ensure /etc/nginx/sites-enabled/jenkins exists and links to ../sites-available/jenkins
   file:
@@ -15,8 +29,6 @@
     src: ../sites-available/jenkins
     force: yes
     state: link
-  notify:
-    - restart nginx
 
 - name: ensure that there is not a hostname collision with the nginx default host
   lineinfile:
@@ -25,8 +37,6 @@
     backrefs: yes
     line: '\1#\2'
     state: present
-  notify:
-    - restart nginx
 
 - name: ensure jenkins services are started and enabled
   service:
@@ -36,4 +46,10 @@
   with_items:
     - jenkins
     - nginx
+
+- name: ensure jenkins is restarted if necessary
+  service:
+    name: jenkins
+    state: restarted
+  when: jenkins_listenport|changed or jenkins_listenaddr|changed
 

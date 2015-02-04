@@ -2,6 +2,10 @@
 jenkins_apt_key_url: https://jenkins-ci.org/debian/jenkins-ci.org.key
 jenkins_apt_repository: deb http://pkg.jenkins-ci.org/debian binary/
 
+jenkins_internal_port: 8888
+
+jenkins_hostname: localhost
+
 jenkins_http_port: 80
 jenkins_https_port: 443
 jenkins_enable_ssl: true
